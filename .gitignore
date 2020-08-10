@@ -1,3 +1,4 @@
 server/node_modules/*
 web/node_modules/*
 server/ormconfig.json
+*.env
