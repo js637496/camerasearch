@@ -1,0 +1,3 @@
+export const SECURITY_LEVEL_SUPER_ADMIN = 1000;
+
+export const SECURITY_LEVEL_ADMIN = 900;
