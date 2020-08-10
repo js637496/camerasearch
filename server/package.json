@@ -1,7 +1,7 @@
 {
    "name": "server",
    "version": "0.0.1",
-   "description": "Awesome project developed with TypeORM.",
+   "description": "Camera Search",
    "devDependencies": {
       "@types/bcryptjs": "^2.4.2",
       "@types/cookie-parser": "^1.4.2",
