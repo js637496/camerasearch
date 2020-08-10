@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useRegisterMutation } from '../generated/graphql';
+import { useRegisterMutation, useIsSuperAdminQuery } from '../generated/graphql';
 import { RouteComponentProps } from 'react-router-dom';
 
 interface Props {
@@ -10,8 +10,12 @@ export const Register: React.FC<RouteComponentProps> = ({history}) => {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [security, setSecurity] = useState('');
+    const [securityLevel, setSecurity] = useState('');
     const [register] = useRegisterMutation();
+
+    const {data, loading, error} = useIsSuperAdminQuery({
+        fetchPolicy: "network-only"
+    });
 
     return (
         <form 
@@ -21,7 +25,8 @@ export const Register: React.FC<RouteComponentProps> = ({history}) => {
                 const response = await register({
                     variables: {
                         email,
-                        password
+                        password,
+                        securityLevel
                     }
                 })
 
@@ -48,15 +53,17 @@ export const Register: React.FC<RouteComponentProps> = ({history}) => {
                     }}
                 />
             </div>
+            { data && data.isSuperAdmin &&
             <div>
                 <input 
-                    value={security}
+                    value={securityLevel}
                     placeholder="0"
                     onChange={e => {
                         setSecurity(e.target.value);
                     }}
                 />
             </div>
+            }
             <button type="submit">register</button>
         </form>
     );

@@ -14,7 +14,7 @@ export class User extends BaseEntity {
 
     @Field(() => Int)
     @Column("int", {nullable: true, default: 0})
-    securityLevel?: number;
+    securityLevel: number;
 
     @Column("text")
     password: string;

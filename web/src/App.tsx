@@ -3,7 +3,7 @@ import { Routes } from './Routes';
 import { setAccessToken } from './accessToken';
 
 declare function require(name: string): string;
-const css = require('./bootstrap-4.5.1-dist/css/bootstrap.min.css')
+const css = require('./bootstrap-4.5.1-dist/css/bootstrap.min.css');
 
 interface Props {
 

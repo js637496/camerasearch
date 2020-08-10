@@ -3,7 +3,7 @@ import { User } from './entity/User';
 import { hash, compare } from 'bcryptjs';
 import { MyContext } from './MyContext';
 import { createRefreshToken, createAccessToken } from './auth';
-import { isAuth } from './isAuth';
+import { isAuth} from './isAuth';
 import { sendRefreshToken } from './sendRefreshToken';
 import { getConnection } from 'typeorm';
 import { verify } from 'jsonwebtoken';
@@ -51,11 +51,22 @@ export class UserResolver {
     
     @Query(() => String)
     @UseMiddleware(isAuth)
-    bye(
+    async bye(
         @Ctx() {payload}: MyContext
     ) {
         console.log(payload);
+        
         return `your user id is ${payload!.userId}`;
+    }
+
+    @Query(() => Boolean)
+    @UseMiddleware(isAuth)
+    async isSuperAdmin(
+        @Ctx() {payload}: MyContext
+    ) {
+        console.log(payload);
+        const user = await User.findOne(payload!.userId)
+        return (user!.securityLevel == 1000);
     }
 
     @Mutation(() => Boolean)
@@ -107,15 +118,22 @@ export class UserResolver {
     @Mutation(() => Boolean)
     async register(
         @Arg('email', () => String) email: string,
-        @Arg('password', () => String) password: string
+        @Arg('password', () => String) password: string,
+        @Arg('securityLevel', () => String) securityLevel: number
     ) {
 
         const hashedPassword = await hash(password, 12);
 
+        // if (!(payload!.securityLevel == 1000))
+        // {
+        //     securityLevel = 0;
+        // }
+
         try {
             await User.insert({
                 email,
-                password: hashedPassword
+                password: hashedPassword,
+                securityLevel
             });
         } catch (err) {
             console.log(err);

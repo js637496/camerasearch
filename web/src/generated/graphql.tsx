@@ -39,6 +39,7 @@ export type MutationLoginArgs = {
 
 
 export type MutationRegisterArgs = {
+  securityLevel: Scalars['String'];
   password: Scalars['String'];
   email: Scalars['String'];
 };
@@ -49,6 +50,7 @@ export type Query = {
   me?: Maybe<User>;
   hello: Scalars['String'];
   bye: Scalars['String'];
+  isSuperAdmin: Scalars['Boolean'];
 };
 
 export type User = {
@@ -74,6 +76,14 @@ export type HelloQuery = (
   & Pick<Query, 'hello'>
 );
 
+export type IsSuperAdminQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type IsSuperAdminQuery = (
+  { __typename?: 'Query' }
+  & Pick<Query, 'isSuperAdmin'>
+);
+
 export type LoginMutationVariables = Exact<{
   email: Scalars['String'];
   password: Scalars['String'];
@@ -87,7 +97,7 @@ export type LoginMutation = (
     & Pick<LoginResponse, 'accessToken'>
     & { user: (
       { __typename?: 'User' }
-      & Pick<User, 'id' | 'email' | 'securityLevel'>
+      & Pick<User, 'id' | 'email'>
     ) }
   ) }
 );
@@ -107,13 +117,14 @@ export type MeQuery = (
   { __typename?: 'Query' }
   & { me?: Maybe<(
     { __typename?: 'User' }
-    & Pick<User, 'id' | 'email' | 'securityLevel'>
+    & Pick<User, 'id' | 'email'>
   )> }
 );
 
 export type RegisterMutationVariables = Exact<{
   email: Scalars['String'];
   password: Scalars['String'];
+  securityLevel: Scalars['String'];
 }>;
 
 
@@ -129,7 +140,7 @@ export type UsersQuery = (
   { __typename?: 'Query' }
   & { users: Array<(
     { __typename?: 'User' }
-    & Pick<User, 'id' | 'email'>
+    & Pick<User, 'id' | 'email' | 'securityLevel'>
   )> }
 );
 
@@ -194,6 +205,36 @@ export function useHelloLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOp
 export type HelloQueryHookResult = ReturnType<typeof useHelloQuery>;
 export type HelloLazyQueryHookResult = ReturnType<typeof useHelloLazyQuery>;
 export type HelloQueryResult = ApolloReactCommon.QueryResult<HelloQuery, HelloQueryVariables>;
+export const IsSuperAdminDocument = gql`
+    query IsSuperAdmin {
+  isSuperAdmin
+}
+    `;
+
+/**
+ * __useIsSuperAdminQuery__
+ *
+ * To run a query within a React component, call `useIsSuperAdminQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIsSuperAdminQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIsSuperAdminQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useIsSuperAdminQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<IsSuperAdminQuery, IsSuperAdminQueryVariables>) {
+        return ApolloReactHooks.useQuery<IsSuperAdminQuery, IsSuperAdminQueryVariables>(IsSuperAdminDocument, baseOptions);
+      }
+export function useIsSuperAdminLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<IsSuperAdminQuery, IsSuperAdminQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<IsSuperAdminQuery, IsSuperAdminQueryVariables>(IsSuperAdminDocument, baseOptions);
+        }
+export type IsSuperAdminQueryHookResult = ReturnType<typeof useIsSuperAdminQuery>;
+export type IsSuperAdminLazyQueryHookResult = ReturnType<typeof useIsSuperAdminLazyQuery>;
+export type IsSuperAdminQueryResult = ApolloReactCommon.QueryResult<IsSuperAdminQuery, IsSuperAdminQueryVariables>;
 export const LoginDocument = gql`
     mutation Login($email: String!, $password: String!) {
   login(email: $email, password: $password) {
@@ -201,7 +242,6 @@ export const LoginDocument = gql`
     user {
       id
       email
-      securityLevel
     }
   }
 }
@@ -266,7 +306,6 @@ export const MeDocument = gql`
   me {
     id
     email
-    securityLevel
   }
 }
     `;
@@ -296,8 +335,8 @@ export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = ApolloReactCommon.QueryResult<MeQuery, MeQueryVariables>;
 export const RegisterDocument = gql`
-    mutation Register($email: String!, $password: String!) {
-  register(email: $email, password: $password)
+    mutation Register($email: String!, $password: String!, $securityLevel: String!) {
+  register(email: $email, password: $password, securityLevel: $securityLevel)
 }
     `;
 export type RegisterMutationFn = ApolloReactCommon.MutationFunction<RegisterMutation, RegisterMutationVariables>;
@@ -317,6 +356,7 @@ export type RegisterMutationFn = ApolloReactCommon.MutationFunction<RegisterMuta
  *   variables: {
  *      email: // value for 'email'
  *      password: // value for 'password'
+ *      securityLevel: // value for 'securityLevel'
  *   },
  * });
  */
@@ -331,6 +371,7 @@ export const UsersDocument = gql`
   users {
     id
     email
+    securityLevel
   }
 }
     `;
