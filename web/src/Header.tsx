@@ -59,7 +59,7 @@ export const Header: React.FC<Props> = ({}) => {
                         {
                             (!loading && data && data.me) ? 
                             (
-                                <a href="javascript:void();" className="nav-link" onClick={async() => {
+                                <a href="#" className="nav-link" onClick={async() => {
                                     await logout();
                                     setAccessToken('');
                                     await client!.resetStore();
