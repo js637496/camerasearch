@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>OpenCV.js</title>
+  <style>
+  </style>
+</head>
+<body>
+
+    <!-- Our HTML will go here-->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<!-- Or if you want a more recent alpha version -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/hls.js@alpha"></script> -->
+<video id="video" autoplay="true" muted="muted" width="320" height="240"></video>
+<canvas id="canvasOutput" width="320" height="240"></canvas>
+<script>
+  var video2 = document.getElementById('video');
+  var videoSrc = 'https://s51.nysdot.skyvdn.com:443/rtplive/R2_041/playlist.m3u8';
+  if (Hls.isSupported()) {
+    var hls = new Hls();
+    hls.loadSource(videoSrc);
+    hls.attachMedia(video2);
+    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+     // video2.play();
+    });
+  }
+  else if (video2.canPlayType('application/vnd.apple.mpegurl')) {
+    video2.src = videoSrc;
+    video2.addEventListener('loadedmetadata', function() {
+      //video2.play();
+    });
+  }
+</script>
+  
+<script async src="opencv.js" type="text/javascript" onload="onCvLoaded();"></script>
+<script>
+function onCvLoaded () {
+    console.log('cv', cv);
+    onReady();
+}
+const video = document.getElementById('video');
+const actionBtn = document.getElementById('actionBtn');
+const FPS = 30;
+let stream;
+let streaming = false;
+function onReady () {
+    console.log('ready');
+    let src;
+    let dst;
+    let cap;
+
+    video.controls = true;
+    video.addEventListener('play', start);
+    video.addEventListener('pause', stop);
+    video.addEventListener('ended', stop);
+
+    function start () {
+        console.log('playing...');
+        streaming = true;
+        const width = video.width;
+        const height = video.height;
+        
+        src = new cv.Mat(height, width, cv.CV_8UC4);
+
+        dst = new cv.Mat(height, width, cv.CV_8UC1);
+        cap = new cv.VideoCapture(video);
+        setTimeout(processVideo, 0);
+    }
+
+    function stop () {
+        console.log('paused or ended');
+        streaming = false;
+    }
+
+    function processVideo () {
+        if (!streaming) {
+            src.delete();
+            dst.delete();
+            return;
+        }
+        const begin = Date.now();
+        let frame1 = cap.read(src);
+        cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+        cv.imshow('canvasOutput', dst);
+        const delay = 1000/FPS - (Date.now() - begin);
+        setTimeout(processVideo, delay);
+    }
+}
+
+</script>
+  
+  </body>
+</html>
