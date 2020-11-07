@@ -4,98 +4,134 @@
   <title>OpenCV.js</title>
   <style>
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
-<body>
-
-    <!-- Our HTML will go here-->
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<!-- Or if you want a more recent alpha version -->
-<!-- <script src="https://cdn.jsdelivr.net/npm/hls.js@alpha"></script> -->
-<video id="video" autoplay="true" muted="muted" width="320" height="240"></video>
-<canvas id="canvasOutput" width="320" height="240"></canvas>
-
-<script>
-  var video2 = document.getElementById('video');
-  var videoSrc = 'https://s51.nysdot.skyvdn.com:443/rtplive/R2_041/playlist.m3u8';
-  if (Hls.isSupported()) {
-    var hls = new Hls();
-    hls.loadSource(videoSrc);
-    hls.attachMedia(video2);
-    hls.on(Hls.Events.MANIFEST_PARSED, function() {
-     // video2.play();
-    });
-  }
-  else if (video2.canPlayType('application/vnd.apple.mpegurl')) {
-    video2.src = videoSrc;
-    video2.addEventListener('loadedmetadata', function() {
-      //video2.play();
-    });
-  }
-</script>
-  
-<script async src="opencv.js" type="text/javascript" onload="onCvLoaded();"></script>
-<script>
-function onCvLoaded () {
-    console.log('cv', cv);
-    onReady();
-}
-
-const actionBtn = document.getElementById('actionBtn');
-const FPS = 30;
-let stream;
-let streaming = false;
-function onReady () {
-    console.log('ready');
+  <body>
+    <video id="video" autoplay="true" muted="muted" width="1280" height="720"></video>
+    <script>
+      var video2 = document.getElementById('video');
+      var videoSrc = 'http://167.21.72.35:1935/live/KCAM004.stream/playlist.m3u8';
+      if (Hls.isSupported()) {
+        var hls = new Hls();
+        hls.loadSource(videoSrc);
+        hls.attachMedia(video2);
+        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        // video2.play();
+        });
+      }
+      else if (video2.canPlayType('application/vnd.apple.mpegurl')) {
+        video2.src = videoSrc;
+        video2.addEventListener('loadedmetadata', function() {
+          //video2.play();
+        });
+      }
+    </script>
     
+    <script async src="opencv.js" type="text/javascript" onload="onCvLoaded();"></script>
+    <script>
+      function onCvLoaded() 
+      {
+          console.log('cv', cv);
+          onReady();
+      }
 
-    let video = document.getElementById('video');
-    let cap = new cv.VideoCapture(video);
+      const actionBtn = document.getElementById('actionBtn');
+      const FPS = 30;
+      let count = 0;
+      let stream;
+      let streaming = false;
 
-    let frame;
-    let fgmask;
-    let fgbg;
+      function onReady() 
+      {
+        let video = document.getElementById('video');
 
-    video.controls = true;
-    video.addEventListener('play', start);
-    video.addEventListener('pause', stop);
-    video.addEventListener('ended', stop);
+        let cap = new cv.VideoCapture(video);
 
-    function start () {
-        console.log('playing...');
-        streaming = true;
-        const width = video.width;
-        const height = video.height;
-        
-        
-        
-        frame = new cv.Mat(video.height, video.width, cv.CV_8UC4);
-        fgmask = new cv.Mat(video.height, video.width, cv.CV_8UC1);
-        fgbg = new cv.BackgroundSubtractorMOG2(75, 150, true);
-        setTimeout(processVideo, 0);
-    }
+        let frameDelta, grayold, greynew, thresh;
+        let dialted;
 
-    function stop () {
-        console.log('paused or ended');
-        streaming = false;
-    }
+        video.controls = true;
+        video.addEventListener('play', start);
+        video.addEventListener('pause', stop);
+        video.addEventListener('ended', stop);
 
-    function processVideo () {
-        if (!streaming) {
-            frame.delete(); fgmask.delete(); fgbg.delete();
-            return;
+        function start() 
+        {
+            console.log('playing...');
+            streaming = true;
+            const width = video.width;
+            const height = video.height;
+
+            oldframe = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+            newframe = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+            frameDelta = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+            thresh = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+            dialted = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+
+            setTimeout(processVideo, 0);
         }
-        let begin = Date.now();
-        // start processing.
-        cap.read(frame);
-        fgbg.apply(frame, fgmask);
-        cv.imshow('canvasOutput', fgmask);
-        // schedule the next one.
-        let delay = 1000/FPS - (Date.now() - begin);
-        setTimeout(processVideo, delay);
-    }
-}
 
-</script>
-  
+        function stop() 
+        {
+            console.log('paused or ended');
+            streaming = false;
+        }
+
+        function processVideo() 
+        {
+          if (!streaming) 
+          {
+            oldframe.delete();
+            newframe.delete();
+            return;
+          }
+          
+          let begin = Date.now();
+
+          cap.read(newframe);
+
+          if (count > 1)
+          {
+            let grayold = new cv.Mat();
+            let greynew = new cv.Mat();
+            cv.cvtColor(oldframe, grayold, cv.COLOR_RGBA2GRAY, 0)
+            cv.cvtColor(newframe, greynew, cv.COLOR_RGBA2GRAY, 0)
+            cv.absdiff(grayold, greynew, frameDelta);
+            cv.threshold(frameDelta, thresh, 25, 255, cv.THRESH_BINARY);
+            
+            let M = cv.Mat.ones(5, 5, cv.CV_8U);
+            let anchor = new cv.Point(-1, -1);
+            cv.dilate(thresh, dialted, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+                    
+            var contours = new cv.MatVector();
+            let hierarchy = new cv.Mat();
+            cv.findContours(dialted, contours, hierarchy,  cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE);
+
+            let retval; 
+            for (var i = 0; i < contours.size(); i++)
+            {
+              if (cv.contourArea(contours.get(i)) < 100)
+                continue;
+              retval = cv.boundingRect(contours.get(i));
+              let dst = new cv.Mat();
+              dst = newframe.roi(retval);
+              var id = count + "_" + i;
+              var can = $("<canvas>").attr("id", id)
+              $("body").append(can)
+              
+              cv.imshow(id, dst);
+            }
+          }
+
+          count++;        
+
+          oldframe = newframe.clone();
+
+          let delay = 1000/FPS - (Date.now() - begin);
+          setTimeout(processVideo, delay);
+        }
+      }
+    </script>
   </body>
 </html>
