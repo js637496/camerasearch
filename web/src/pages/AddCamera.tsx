@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
-import { useAddCameraMutation } from '../generated/graphql';
-import { useCamerasQuery } from '../generated/graphql';
+import { useAddCameraMutation, useCamerasQuery } from '../generated/graphql';
 import { RouteComponentProps } from 'react-router-dom';
 
 interface Props {
