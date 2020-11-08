@@ -1,0 +1,3 @@
+mutation AddCamera($cameraID: String!, $description: String!, $stream: String!, $latitude: String!, $longitude: String!) {
+    addCamera(cameraID: $cameraID, description: $description, stream: $stream, latitude: $latitude, longitude: $longitude)
+}

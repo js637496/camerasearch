@@ -11,6 +11,7 @@ import { User } from './entity/User';
 import { createAccessToken, createRefreshToken } from "./auth";
 import { sendRefreshToken } from "./sendRefreshToken";
 import cors from "cors";
+import { CameraResolver } from "./CameraResolver";
 
 (async () => {
     const app = express();
@@ -60,14 +61,14 @@ import cors from "cors";
 
     const apolloServer = new ApolloServer({
         schema: await buildSchema({
-            resolvers: [UserResolver]
+            resolvers: [UserResolver, CameraResolver]
         }),
         context: ({ req, res }) => ({ req, res })
     });
 
     apolloServer.applyMiddleware({ app, cors: false });
 
-    app.listen(4000, () => {
+    app.listen(4001, () => {
         console.log("Express server started");
     });
 

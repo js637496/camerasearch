@@ -12,6 +12,16 @@ export type Scalars = {
   Float: number;
 };
 
+export type Camera = {
+  __typename?: 'Camera';
+  id: Scalars['Int'];
+  cameraID: Scalars['String'];
+  description: Scalars['String'];
+  stream: Scalars['String'];
+  latitude: Scalars['String'];
+  longitude: Scalars['String'];
+};
+
 export type LoginResponse = {
   __typename?: 'LoginResponse';
   accessToken: Scalars['String'];
@@ -24,6 +34,7 @@ export type Mutation = {
   revokeRefreshTokensForUser: Scalars['Boolean'];
   login: LoginResponse;
   register: Scalars['Boolean'];
+  addCamera: Scalars['Boolean'];
 };
 
 
@@ -44,6 +55,15 @@ export type MutationRegisterArgs = {
   email: Scalars['String'];
 };
 
+
+export type MutationAddCameraArgs = {
+  longitude: Scalars['String'];
+  latitude: Scalars['String'];
+  stream: Scalars['String'];
+  description: Scalars['String'];
+  cameraID: Scalars['String'];
+};
+
 export type Query = {
   __typename?: 'Query';
   users: Array<User>;
@@ -51,6 +71,7 @@ export type Query = {
   hello: Scalars['String'];
   bye: Scalars['String'];
   isSuperAdmin: Scalars['Boolean'];
+  cameras: Array<Camera>;
 };
 
 export type User = {
@@ -60,12 +81,37 @@ export type User = {
   securityLevel: Scalars['Int'];
 };
 
+export type AddCameraMutationVariables = Exact<{
+  cameraID: Scalars['String'];
+  description: Scalars['String'];
+  stream: Scalars['String'];
+  latitude: Scalars['String'];
+  longitude: Scalars['String'];
+}>;
+
+
+export type AddCameraMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'addCamera'>
+);
+
 export type ByeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type ByeQuery = (
   { __typename?: 'Query' }
   & Pick<Query, 'bye'>
+);
+
+export type CamerasQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CamerasQuery = (
+  { __typename?: 'Query' }
+  & { cameras: Array<(
+    { __typename?: 'Camera' }
+    & Pick<Camera, 'id' | 'cameraID' | 'description' | 'stream' | 'latitude' | 'longitude'>
+  )> }
 );
 
 export type HelloQueryVariables = Exact<{ [key: string]: never; }>;
@@ -145,6 +191,40 @@ export type UsersQuery = (
 );
 
 
+export const AddCameraDocument = gql`
+    mutation AddCamera($cameraID: String!, $description: String!, $stream: String!, $latitude: String!, $longitude: String!) {
+  addCamera(cameraID: $cameraID, description: $description, stream: $stream, latitude: $latitude, longitude: $longitude)
+}
+    `;
+export type AddCameraMutationFn = ApolloReactCommon.MutationFunction<AddCameraMutation, AddCameraMutationVariables>;
+
+/**
+ * __useAddCameraMutation__
+ *
+ * To run a mutation, you first call `useAddCameraMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddCameraMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addCameraMutation, { data, loading, error }] = useAddCameraMutation({
+ *   variables: {
+ *      cameraID: // value for 'cameraID'
+ *      description: // value for 'description'
+ *      stream: // value for 'stream'
+ *      latitude: // value for 'latitude'
+ *      longitude: // value for 'longitude'
+ *   },
+ * });
+ */
+export function useAddCameraMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<AddCameraMutation, AddCameraMutationVariables>) {
+        return ApolloReactHooks.useMutation<AddCameraMutation, AddCameraMutationVariables>(AddCameraDocument, baseOptions);
+      }
+export type AddCameraMutationHookResult = ReturnType<typeof useAddCameraMutation>;
+export type AddCameraMutationResult = ApolloReactCommon.MutationResult<AddCameraMutation>;
+export type AddCameraMutationOptions = ApolloReactCommon.BaseMutationOptions<AddCameraMutation, AddCameraMutationVariables>;
 export const ByeDocument = gql`
     query Bye {
   bye
@@ -175,6 +255,43 @@ export function useByeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOpti
 export type ByeQueryHookResult = ReturnType<typeof useByeQuery>;
 export type ByeLazyQueryHookResult = ReturnType<typeof useByeLazyQuery>;
 export type ByeQueryResult = ApolloReactCommon.QueryResult<ByeQuery, ByeQueryVariables>;
+export const CamerasDocument = gql`
+    query Cameras {
+  cameras {
+    id
+    cameraID
+    description
+    stream
+    latitude
+    longitude
+  }
+}
+    `;
+
+/**
+ * __useCamerasQuery__
+ *
+ * To run a query within a React component, call `useCamerasQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCamerasQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCamerasQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCamerasQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CamerasQuery, CamerasQueryVariables>) {
+        return ApolloReactHooks.useQuery<CamerasQuery, CamerasQueryVariables>(CamerasDocument, baseOptions);
+      }
+export function useCamerasLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CamerasQuery, CamerasQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<CamerasQuery, CamerasQueryVariables>(CamerasDocument, baseOptions);
+        }
+export type CamerasQueryHookResult = ReturnType<typeof useCamerasQuery>;
+export type CamerasLazyQueryHookResult = ReturnType<typeof useCamerasLazyQuery>;
+export type CamerasQueryResult = ApolloReactCommon.QueryResult<CamerasQuery, CamerasQueryVariables>;
 export const HelloDocument = gql`
     query Hello {
   hello

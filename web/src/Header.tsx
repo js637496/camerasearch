@@ -39,6 +39,9 @@ export const Header: React.FC<Props> = ({}) => {
                             <LinkContainer to="/registeradmin">
                                 <NavDropdown.Item>Register New Admin</NavDropdown.Item>
                             </LinkContainer>
+                            <LinkContainer to="/cameraconfig">
+                                <NavDropdown.Item>Camera Config</NavDropdown.Item>
+                            </LinkContainer>
                         </NavDropdown>
                     </Nav>
                     <Nav>                        

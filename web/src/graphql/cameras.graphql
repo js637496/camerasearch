@@ -1,0 +1,10 @@
+query Cameras {
+    cameras {
+        id
+        cameraID
+        description
+        stream
+        latitude
+        longitude
+    }
+}
